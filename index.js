@@ -17,8 +17,9 @@ const toCollection = process.env.TO_COLLECTION;
 const start = new Date(process.env.START_DATE);
 const end = process.env.END_DATE ? new Date(process.env.END_DATE) : new Date();
 
-const DAY_TIME = 8.64e7;
-const totalDays = Math.ceil((end.getTime() - start.getTime()) / DAY_TIME);
+// const HALF_DAY_TIME = 8.64e7;
+const HALF_DAY_TIME = 4.32e7;
+const totalDays = Math.ceil((end.getTime() - start.getTime()) / HALF_DAY_TIME);
 
 const migration = new (require(`./migrations/${process.env.MIGRATION}`))(toClient, toCollection);
 
@@ -30,8 +31,8 @@ function extract(index) {
 
   console.log(`running (${index + 1}/${totalDays + 1})...`);
 
-  const dayStart = start.getTime() + (DAY_TIME * index);
-  const dayEnd = dayStart + (DAY_TIME - 1);
+  const dayStart = start.getTime() + (HALF_DAY_TIME * index);
+  const dayEnd = dayStart + (HALF_DAY_TIME - 1);
 
   const timeframe = {
     start: new Date(dayStart).toUTCString(),
