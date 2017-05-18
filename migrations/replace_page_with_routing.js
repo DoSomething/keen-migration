@@ -39,44 +39,25 @@ function getActualPath(path) {
   return fixed;
 }
 
-class Test extends Migration {
-  constructor(client, project) {
-    super(client, project);
+class ReplacePageWithRouting extends Migration {
+  constructor(client, collection) {
+    super(client, collection);
   }
 
-  pipe(data, callback) {
-    const fixedData = [];
+  pipe(data) {
     for (const item of data) {
-      const pathname = getActualPath(item.page.path);
-      const page = getRouteName(pathname);
-      const referer = item.page.referer;
+      if (!item.routing) {
+        const pathname = getActualPath(item.page.path);
+        const page = getRouteName(pathname);
+        const referer = item.page.referer;
 
-      item.routing = { pathname, page, referer };
-      delete item.page;
-
-      // Avoid Keen conflicts
-      delete item.keen.id;
-      delete item.keen.created_at;
-
-      fixedData.push(item);
-    }
-
-    const pushData = () => {
-      if (fixedData.length === 0) {
-        console.log('pushed events');
-        callback();
-        return;
+        item.routing = { pathname, page, referer };
+        delete item.page;
       }
 
-      this.client.addEvent(this.project, fixedData.pop(), (err, res) => {
-        if (err) console.log(err);
-        else console.log(fixedData.length)
-        pushData();
-      });
+      this.addEvent(item);
     }
-
-    pushData();
   }
 }
 
-module.exports = Test;
+module.exports = ReplacePageWithRouting;

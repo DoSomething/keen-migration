@@ -50,7 +50,8 @@ function extract(index) {
     }
 
     const { result } = res;
-    migration.pipe(result, () => extract(index + 1));
+    migration.pipe(result);
+    migration.dispatchEvents(() => extract(index + 1));
   });
 }
 
