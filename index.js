@@ -17,11 +17,14 @@ const toCollection = process.env.TO_COLLECTION;
 const start = new Date(process.env.START_DATE);
 const end = process.env.END_DATE ? new Date(process.env.END_DATE) : new Date();
 
-// const HALF_DAY_TIME = 8.64e7;
-const HALF_DAY_TIME = 4.32e7 / 2;
-const totalDays = Math.ceil((end.getTime() - start.getTime()) / HALF_DAY_TIME);
+// const INTERVAL = 8.64e7;
+const INTERVAL = 1.08e7;
+const totalDays = Math.ceil((end.getTime() - start.getTime()) / INTERVAL);
 
 const migration = new (require(`./migrations/${process.env.MIGRATION}`))(toClient, toCollection);
+
+const MIN_TIME = 6e3; // 10 seconds
+let startTime = Date.now();
 
 function extract(index) {
   if (index >= totalDays) {
@@ -31,8 +34,9 @@ function extract(index) {
 
   console.log(`running (${index + 1}/${totalDays + 1})...`);
 
-  const dayStart = start.getTime() + (HALF_DAY_TIME * index);
-  const dayEnd = dayStart + (HALF_DAY_TIME - 1);
+  startTime = Date.now();
+  const dayStart = start.getTime() + (INTERVAL * index);
+  const dayEnd = dayStart + (INTERVAL - 1);
 
   const timeframe = {
     start: new Date(dayStart).toUTCString(),
@@ -52,7 +56,11 @@ function extract(index) {
 
     const { result } = res;
     migration.pipe(result);
-    migration.dispatchEvents(() => extract(index + 1));
+    migration.dispatchEvents(() => {
+      setTimeout(() => {
+        extract(index + 1)
+      }, Math.max(0, MIN_TIME - (Date.now() - startTime))); // Prevent API rate limits from crashing the app
+    });
   });
 }
 

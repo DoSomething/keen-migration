@@ -27,6 +27,11 @@ class Migration {
   }
 
   dispatchEvents(callback) {
+    if (!this.events.length) {
+      callback();
+      return;
+    }
+
     const batchSize = 20;
 
     for (let i = 0; i < this.events.length; i++) {
