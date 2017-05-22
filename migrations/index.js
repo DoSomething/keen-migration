@@ -42,6 +42,7 @@ class Migration {
   _dispatchBatch(callback, last = false) {
     if (last) {
       console.log('all events dispatched');
+      this.events = [];
       callback();
       return;
     }

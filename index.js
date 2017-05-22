@@ -18,7 +18,7 @@ const start = new Date(process.env.START_DATE);
 const end = process.env.END_DATE ? new Date(process.env.END_DATE) : new Date();
 
 // const HALF_DAY_TIME = 8.64e7;
-const HALF_DAY_TIME = 4.32e7;
+const HALF_DAY_TIME = 4.32e7 / 2;
 const totalDays = Math.ceil((end.getTime() - start.getTime()) / HALF_DAY_TIME);
 
 const migration = new (require(`./migrations/${process.env.MIGRATION}`))(toClient, toCollection);

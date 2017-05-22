@@ -1,7 +1,4 @@
-const Migration = require('./');
-
 // From: https://github.com/DoSomething/phoenix-next/pull/261/files
-
 const paths = {
    community: '/',
    action: '/action',
@@ -39,25 +36,14 @@ function getActualPath(path) {
   return fixed;
 }
 
-class ReplacePageWithRouting extends Migration {
-  constructor(client, collection) {
-    super(client, collection);
-  }
-
-  pipe(data) {
-    for (const item of data) {
-      if (!item.routing) {
-        const pathname = getActualPath(item.page.path);
-        const page = getRouteName(pathname);
-        const referer = item.page.referer;
-
-        item.routing = { pathname, page, referer };
-        delete item.page;
-      }
-
-      this.addEvent(item);
-    }
-  }
+function removeCampaignData(item) {
+  const legacyCampaignId = item.campaign.legacyCampaignId;
+  item.campaign = { legacyCampaignId };
 }
 
-module.exports = ReplacePageWithRouting;
+module.exports = {
+  paths,
+  getRouteName,
+  getActualPath,
+  removeCampaignData,
+};
